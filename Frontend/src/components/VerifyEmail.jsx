@@ -60,7 +60,7 @@ const VerifyEmail = () => {
 
             if (response.ok) {
                 localStorage.removeItem("email");
-                navigate("/dashboard");
+                navigate("/login");
             } else {
                 setErrorMessage(data.msg || "Invalid OTP! Please try again.");
             }

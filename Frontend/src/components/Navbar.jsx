@@ -1,87 +1,40 @@
-import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
-  Box,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Button, Box } from "@mui/material";
 
-export default function App() {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+const Navbar = () => {
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const navigate = useNavigate();
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      {/* Fixed Navbar */}
-      <AppBar position="fixed">
-        <Toolbar>
-          {/* Hamburger Menu for Mobile */}
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2, display: { xs: "block", md: "none" } }} // Show only on mobile
-            onClick={handleMenuOpen}
-          >
-            <MenuIcon />
-          </IconButton>
+    <AppBar position="sticky" className="bg-blue-600 shadow-md">
+      <Toolbar className="flex justify-between items-center px-4">
+        <Link to="/" className="text-2xl font-bold text-white">Health<span className="text-red-500">iFy</span></Link>
 
-          {/* Logo or Brand Name */}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            HealthiFy
-          </Typography>
-
-          {/* Navigation Links for Desktop */}
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            <Button color="inherit" href="#home">
-              Home
-            </Button>
-            <Button color="inherit" href="#about">
-              About
-            </Button>
-            <Button color="inherit" href="#contact">
-              Contact
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Mobile Menu */}
-      <Menu
-        id="mobile-menu"
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        sx={{ display: { xs: "block", md: "none" } }} // Show only on mobile
-      >
-        <MenuItem onClick={handleMenuClose} component="a" href="#home">
-          Home
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose} component="a" href="#about">
-          About
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose} component="a" href="#contact">
-          Contact
-        </MenuItem>
-      </Menu>
-
-      {/* Add padding to the bottom of the page to prevent content from being hidden under the fixed navbar */}
-      
-      <Box sx={{ height: "64px" }}>
-      </Box>
-    </Box>
+        <Box className="flex items-center">
+          {isAuthenticated ? (
+            <>
+              <IconButton onClick={handleMenuOpen}>
+                <Avatar className="bg-white text-blue-600 font-bold">{user?.name?.charAt(0).toUpperCase()}</Avatar>
+              </IconButton>
+              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} anchorOrigin={{ vertical: "bottom", horizontal: "right" }} transformOrigin={{ vertical: "top", horizontal: "right" }}>
+                <MenuItem onClick={() => { logout(); navigate("/login"); handleMenuClose(); }}>Logout</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Link to="/login">
+              <Button variant="contained" sx={{ borderRadius: "20px", backgroundColor: "#4a90e2", color: "white", textTransform: "none" }}>Login</Button>
+            </Link>
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
-}
+};
+
+export default Navbar;
