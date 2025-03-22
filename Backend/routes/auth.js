@@ -137,6 +137,72 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Forgot Password - Send OTP
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) return res.status(400).json({ msg: "Email is required" });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "User not found" });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordOTP = otp;
+    user.resetPasswordExpires = Date.now() + 5 * 60 * 1000; // 5 minutes expiry
+    await user.save();
+
+    // Send OTP via email
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your password reset OTP is: ${otp}. It will expire in 5 minutes.`,
+    });
+
+    res.json({ msg: "OTP sent to email. Please enter it to reset your password." });
+
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+});
+
+// Reset Password using OTP
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ msg: "All fields are required" });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ msg: "Password must be at least 8 characters long" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user || !user.resetPasswordOTP || user.resetPasswordExpires < Date.now()) {
+      return res.status(400).json({ msg: "Invalid or expired OTP" });
+    }
+
+    if (user.resetPasswordOTP !== otp) {
+      return res.status(400).json({ msg: "Incorrect OTP" });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    res.json({ msg: "Password reset successfully. You can now log in." });
+
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+});
+
 // Get User Profile (Protected)
 router.get("/profile", authMiddleware, async (req, res) => {
   try {
