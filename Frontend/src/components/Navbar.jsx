@@ -1,7 +1,10 @@
 import { useContext, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Button, Box, Drawer, List, ListItem, ListItemText, Divider, Typography, useMediaQuery } from "@mui/material";
+import {
+  AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Button, Box, Drawer, List, ListItem, ListItemText, 
+  Divider, Typography, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTheme, ThemeProvider, createTheme } from "@mui/material/styles";
@@ -12,6 +15,7 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const navigate = useNavigate();
 
   const muiTheme = useTheme();
@@ -21,19 +25,27 @@ const Navbar = () => {
   const handleMenuClose = () => setAnchorEl(null);
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
-  const navItems = [
-    { path: "/", label: "Home" },
-    { path: "/doctors", label: "Doctors" },
-    { path: "/about", label: "About" },
-    { path: "/contact", label: "Contact" },
-  ];
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setOpenLogoutDialog(false);
+  };
+
+  let navItems = [];
 
   if (isAuthenticated && user?.role === "doctor") {
-    navItems.push(
+    navItems = [
       { path: "/dashboard", label: "Dashboard" },
       { path: "/patient-requests", label: "Patient Requests" },
-      { path: "/video-calls", label: "Video Calls" }
-    );
+      { path: "/video-calls", label: "Video Calls" },
+    ];
+  } else {
+    navItems = [
+      { path: "/", label: "Home" },
+      { path: "/doctors", label: "Doctors" },
+      { path: "/about", label: "About" },
+      { path: "/contact", label: "Contact" },
+    ];
   }
 
   return (
@@ -86,17 +98,14 @@ const Navbar = () => {
                   <MenuItem onClick={() => { navigate("/my-appointments"); handleMenuClose(); }} className="hover:bg-gray-100">
                     My Appointments
                   </MenuItem>
-                  <MenuItem onClick={() => { logout(); navigate("/"); handleMenuClose(); }} className="hover:bg-red-100 text-red-600">
-                    Logout
-                  </MenuItem>
+                  <MenuItem onClick={() => { setOpenLogoutDialog(true); handleMenuClose(); }} className="hover:bg-red-100 text-red-600">Logout</MenuItem>
+
                 </Menu>
               </>
             ) : (
               !isMobile && (
                 <NavLink to="/login">
-                  <Button className="rounded-full bg-blue-400 text-white capitalize px-4 py-2 hover:bg-blue-500">
-                    Login
-                  </Button>
+                  <Button variant="contained" sx={{ borderRadius: "20px", backgroundColor: "#4a90e2", color: "white", textTransform: "none" }}>Login</Button>
                 </NavLink>
               )
             )}
@@ -158,9 +167,7 @@ const Navbar = () => {
                   <Button fullWidth className="bg-gray-100 text-black mt-2" onClick={() => { navigate("/my-appointments"); handleDrawerToggle(); }}>
                     My Appointments
                   </Button>
-                  <Button fullWidth className="bg-red-500 text-white mt-2" onClick={() => { logout(); navigate("/"); handleDrawerToggle(); }}>
-                    Logout
-                  </Button>
+                  <Button fullWidth className="bg-red-500 text-white mt-2" onClick={() => { setOpenLogoutDialog(true); handleDrawerToggle(); }}>Logout</Button>
                 </>
               ) : (
                 <NavLink to="/login">
@@ -172,6 +179,20 @@ const Navbar = () => {
             </Box>
           </Box>
         </Drawer>
+        <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
+          <DialogTitle>Are You Sure?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Do you really want to logout?</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenLogoutDialog(false)} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleLogout} color="error">
+              Logout
+            </Button>
+          </DialogActions>
+        </Dialog>
       </AppBar>
     </ThemeProvider>
   );
