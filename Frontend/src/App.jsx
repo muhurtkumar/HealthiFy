@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext"
+import PrivateRoute from "./components/PrivateRoute";
 import "./App.css";
 import "./index.css";
 import Navbar from "./components/Navbar";
@@ -8,6 +9,7 @@ import VerifyEmail from "./components/VerifyEmail";
 import Login from "./components/Login";
 import ForgotPassword from "./components/ForgotPassword";
 import Home from "./components/Home";
+import MyAppointment from "./components/MyAppointment";
 
 function App() {
   return (
@@ -20,6 +22,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          {/* Protected Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/my-appointments" element={<MyAppointment />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>
