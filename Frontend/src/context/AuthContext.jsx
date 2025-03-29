@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
           ...userData,
           avatar:
             userData.profilePhoto && userData.profilePhoto.trim() !== ""
-              ? userData.profilePhoto
+              ? `http://localhost:8000${userData.profilePhoto}`
               : userData.name?.charAt(0).toUpperCase(),
         };
 

@@ -14,6 +14,24 @@ const UserSchema = new mongoose.Schema({
     enum: ["Patient", "Doctor", "Admin"], 
     default: "Patient" 
   },
+  phone: { 
+    type: String, 
+    trim: true, 
+    unique: true, 
+    sparse: true, 
+    minlength: 10, 
+    maxlength: 10,
+    validate: {
+      validator: function(value) {
+        return /^[0-9]{10}$/.test(value); // Only allows exactly 10 digits
+      },
+      message: "Phone number must be exactly 10 digits and contain only numbers."
+    }
+  },
+  gender: { type: String, enum: ["Male", "Female", "Other"], default: "Other" },
+  address: { type: String, trim: true },
+  city: { type: String, trim: true },
+  state: { type: String, trim: true },
   profilePhoto: { type: String, default: "" },
   otp: { type: String },
   otpExpires: { type: Date },
