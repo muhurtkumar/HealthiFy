@@ -80,9 +80,13 @@ const Navbar = () => {
               <>
                 {!isMobile && (
                   <IconButton onClick={handleMenuOpen}>
-                    <Avatar className="bg-white text-blue-600 font-bold">
-                      {user?.name?.charAt(0).toUpperCase()}
+                    <Avatar
+                      src={typeof user?.avatar === "string" && user?.avatar.startsWith("http") ? user.avatar : undefined}
+                      className="bg-blue-600 text-white font-bold"
+                    >
+                      {typeof user?.avatar === "string" && !user?.avatar.startsWith("http") ? user.avatar : "U"}
                     </Avatar>
+
                   </IconButton>
                 )}
                 <Menu
@@ -99,7 +103,6 @@ const Navbar = () => {
                     My Appointments
                   </MenuItem>
                   <MenuItem onClick={() => { setOpenLogoutDialog(true); handleMenuClose(); }} className="hover:bg-red-100 text-red-600">Logout</MenuItem>
-
                 </Menu>
               </>
             ) : (
@@ -126,8 +129,11 @@ const Navbar = () => {
             <Box className="flex justify-between items-center px-4 py-3 border-b">
               <Box className="flex items-center space-x-3">
                 {isAuthenticated && (
-                  <Avatar className="bg-blue-600 text-white font-bold">
-                    {user?.name?.charAt(0).toUpperCase()}
+                  <Avatar
+                    src={typeof user?.avatar === "string" && user?.avatar.startsWith("http") ? user.avatar : undefined}
+                    className="bg-blue-600 text-white font-bold"
+                  >
+                    {typeof user?.avatar === "string" && !user?.avatar.startsWith("http") ? user.avatar : "U"}
                   </Avatar>
                 )}
                 <Typography variant="h6" className="text-blue-600 font-semibold">

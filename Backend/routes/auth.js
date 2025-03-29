@@ -127,8 +127,15 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
+    // Set cookie with token
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.json({ 
-      token, 
       user: { id: user._id, name: user.name, email: user.email, role: user.role, profilePhoto: user.profilePhoto || "" } 
     });
 
@@ -217,6 +224,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
 
 // Logout User
 router.post("/logout", (req, res) => {
+  res.clearCookie('jwt');
   res.json({ msg: "Logged out successfully" });
 });
 

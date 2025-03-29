@@ -1,13 +1,12 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.header("Authorization");
+  // Get token from cookie instead of header
+  const token = req.cookies.jwt; // Assuming your token is stored in a cookie named 'jwt'
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!token) {
     return res.status(401).json({ msg: "No token, authorization denied" });
   }
-
-  const token = authHeader.split(" ")[1]; // Extract token after "Bearer "
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -15,8 +14,12 @@ const authMiddleware = (req, res, next) => {
     next();
   } catch (err) {
     if (err.name === "TokenExpiredError") {
+      // Clear the expired token cookie
+      res.clearCookie('jwt');
       return res.status(401).json({ msg: "Token expired, please log in again" });
     }
+    // Clear the invalid token cookie
+    res.clearCookie('jwt');
     return res.status(401).json({ msg: "Invalid token" });
   }
 };

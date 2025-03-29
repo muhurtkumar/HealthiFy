@@ -18,22 +18,15 @@ const Login = () => {
     setLoading(true);
     setMessage("");
     try {
-      const res = await fetch("http://localhost:8000/healthify/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        login(data.token, data.user);
-        navigate("/");
-      } else {
-        setMessage(data.msg);
-      }
-    } catch {
-      setMessage("Server error. Please try again.");
+      const result = await login(formData.email, formData.password);
+      if (result.success) navigate("/");
+      else setMessage(result.message || "Login failed");
+    } catch (error) {
+      setMessage("An error occurred. Please try again.");
+      console.error("Login error:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
