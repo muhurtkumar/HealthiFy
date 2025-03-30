@@ -77,6 +77,30 @@ export const useProfileForm = (user, updateUserProfile) => {
   const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        setNotificationState({
+          open: true,
+          message: "Only JPG, PNG, and WebP image formats are allowed",
+          severity: "error"
+        });
+        e.target.value = null;
+        return;
+      }
+      
+      // Validate file size (5MB limit)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        setNotificationState({
+          open: true,
+          message: "Image size must be less than 5MB",
+          severity: "error"
+        });
+        e.target.value = null;
+        return;
+      }
+      
       setSelectedProfileImage(file);
       setProfileData({
         ...profileData,
@@ -101,18 +125,26 @@ export const useProfileForm = (user, updateUserProfile) => {
       formData.append('profilePhoto', selectedProfileImage);
     }
     
-    const response = await fetch("http://localhost:8000/healthify/auth/update-profile", {
-      method: "PUT",
-      credentials: "include",
-      body: formData
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.msg || "Failed to update profile");
+    try {
+      const response = await fetch("http://localhost:8000/healthify/auth/update-profile", {
+        method: "PUT",
+        credentials: "include",
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || "Failed to update profile");
+      }
+      
+      return await response.json();
+    } catch (error) {
+      // Handle network errors
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        throw new Error("Network error. Please check your connection.");
+      }
+      throw error;
     }
-    
-    return await response.json();
   };
 
   // Form submission handler
