@@ -5,6 +5,8 @@ const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const nodemailer = require("nodemailer");
 const authMiddleware = require("../middlewares/authMiddleware");
+const fs = require('fs');
+const path = require('path');
 require("dotenv").config();
 
 const router = express.Router();
@@ -13,7 +15,7 @@ const router = express.Router();
 // Configure storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = './uploads';
+    const uploadPath = path.join(__dirname, '..', 'uploads');
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
     }
@@ -250,13 +252,30 @@ router.get("/profile", authMiddleware, async (req, res) => {
 });
 
 // Update User Profile (Protected)
-const fs = require('fs');
-const path = require('path');
-
 router.put(
   "/update-profile",
   authMiddleware,
-  upload.single("profilePhoto"),
+  (req, res, next) => {
+    // Error handling middleware for multer
+    upload.single("profilePhoto")(req, res, (err) => {
+      if (err) {
+        if (err instanceof multer.MulterError) {
+          // Multer error (file too large, etc)
+          return res.status(400).json({ 
+            msg: err.code === 'LIMIT_FILE_SIZE' 
+              ? "File size too large. Maximum size is 5MB." 
+              : `Upload error: ${err.message}` 
+          });
+        } else {
+          // Other errors (file type, etc)
+          return res.status(400).json({ 
+            msg: err.message || "Unknown file upload error" 
+          });
+        }
+      }
+      next();
+    });
+  },
   async (req, res) => {
     try {
       const userId = req.user.id;
@@ -282,14 +301,18 @@ router.put(
         
         // Delete old photo safely
         if (user.profilePhoto) {
-          const oldPhotoPath = path.join(
-            __dirname, 
-            '..', 
-            user.profilePhoto.replace('/uploads/', 'uploads/')
-          );
-          fs.unlink(oldPhotoPath, (err) => {
-            if (err) console.error("Failed to delete old photo:", err);
-          });
+          try {
+            const oldPhotoPath = path.join(
+              __dirname, 
+              '..', 
+              user.profilePhoto.replace(/^\/uploads\//, 'uploads/')
+            );
+            if (fs.existsSync(oldPhotoPath)) {
+              fs.unlinkSync(oldPhotoPath);
+            }
+          } catch (err) {
+            console.error("Failed to delete old photo:", err);
+          }
         }
       }
 

@@ -1,6 +1,7 @@
 import { Box, Avatar, IconButton, Input, Typography, CircularProgress } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { useState } from "react";
+import { getImageUrl } from "../../utils/apiConfig";
 
 // Profile image section with upload functionality
 const ProfileImageUploader = ({ 
@@ -24,13 +25,26 @@ const ProfileImageUploader = ({
 
   // Get the correct image source for display
   const getProfileImageSource = () => {
+    // If we've selected a new image, use its preview URL
     if (selectedProfileImage) {
       return profileData.profilePhoto; // Local object URL for preview
     }
-    if (profileData.profilePhoto && profileData.profilePhoto.startsWith('/')) {
-      return `http://localhost:8000${profileData.profilePhoto}`; // Server URL
+    
+    // Use the image from the profile data
+    if (profileData.profilePhoto) {
+      // If it's a full URL, use it directly
+      if (profileData.profilePhoto.startsWith('http')) {
+        return profileData.profilePhoto;
+      }
+      
+      // If it's a server path, use our URL helper
+      if (profileData.profilePhoto.startsWith('/')) {
+        return getImageUrl(profileData.profilePhoto);
+      }
     }
-    return profileData.profilePhoto; // Default or empty
+    
+    // No image
+    return undefined;
   };
 
   // Get the first letter of name for avatar fallback

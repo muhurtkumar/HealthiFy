@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { getApiUrl, API_ENDPOINTS, getImageUrl } from '../../utils/apiConfig';
 
 // Field definitions for profile form
 export const profileFieldDefinitions = {
@@ -122,22 +123,23 @@ export const useProfileForm = (user, updateUserProfile) => {
     
     // Add profile photo if selected
     if (selectedProfileImage) {
-      formData.append('profilePhoto', selectedProfileImage);
+      formData.append('profilePhoto', selectedProfileImage, selectedProfileImage.name);
     }
     
     try {
-      const response = await fetch("http://localhost:8000/healthify/auth/update-profile", {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.UPDATE_PROFILE), {
         method: "PUT",
         credentials: "include",
         body: formData
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.msg || "Failed to update profile");
+        throw new Error(data.msg || "Failed to update profile");
       }
       
-      return await response.json();
+      return data;
     } catch (error) {
       // Handle network errors
       if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -162,7 +164,7 @@ export const useProfileForm = (user, updateUserProfile) => {
           ...result.user,
           // Create avatar property for navbar display
           avatar: result.user.profilePhoto 
-            ? `http://localhost:8000${result.user.profilePhoto}`
+            ? getImageUrl(result.user.profilePhoto)
             : result.user.name?.charAt(0).toUpperCase()
         };
         

@@ -11,8 +11,31 @@ import CloseIcon from "@mui/icons-material/Close";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { getImageUrl } from "../utils/apiConfig";
 
 const theme = createTheme();
+
+// Helper to safely get avatar source
+const getAvatarSrc = (avatar) => {
+  if (!avatar) return undefined;
+  
+  // If it's already a URL or a letter
+  if (typeof avatar !== 'string' || avatar.length <= 1) {
+    return undefined;
+  }
+  
+  // If it's already a full URL
+  if (avatar.startsWith('http')) {
+    return avatar;
+  }
+  
+  // If it's a path from the backend
+  if (avatar.startsWith('/uploads/')) {
+    return getImageUrl(avatar);
+  }
+  
+  return undefined;
+};
 
 const Navbar = () => {
   const { isAuthenticated, user, logout, profileStatus } = useContext(AuthContext);
@@ -153,13 +176,13 @@ const Navbar = () => {
                         }
                       >
                         <Avatar
-                          src={user?.avatar && typeof user?.avatar === 'string' && user?.avatar.startsWith('http') ? user.avatar : undefined}
+                          src={getAvatarSrc(user?.avatar)}
                           sx={{ 
                             width: 36, 
                             height: 36,
                           }}
                         >
-                          {typeof user?.avatar === 'string' && !user?.avatar.startsWith('http') ? user.avatar : user?.name?.charAt(0).toUpperCase() || 'U'}
+                          {!getAvatarSrc(user?.avatar) ? user?.name?.charAt(0).toUpperCase() || 'U' : null}
                         </Avatar>
                       </Badge>
                       <Typography
@@ -272,10 +295,10 @@ const Navbar = () => {
               <Box className="flex items-center space-x-3">
                 {isAuthenticated && (
                   <Avatar
-                    src={user?.avatar && typeof user?.avatar === 'string' && user?.avatar.startsWith('http') ? user.avatar : undefined}
+                    src={getAvatarSrc(user?.avatar)}
                     className="bg-blue-600 text-white font-bold"
                   >
-                    {typeof user?.avatar === 'string' && !user?.avatar.startsWith('http') ? user.avatar : user?.name?.charAt(0).toUpperCase() || 'U'}
+                    {!getAvatarSrc(user?.avatar) ? user?.name?.charAt(0).toUpperCase() || 'U' : null}
                   </Avatar>
                 )}
                 <Typography variant="h6" className="text-blue-600 font-semibold">

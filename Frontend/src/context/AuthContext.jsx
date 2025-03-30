@@ -1,4 +1,5 @@
-import { createContext, useState, useEffect, useMemo } from "react";
+import { createContext, useState, useEffect } from "react";
+import { getApiUrl, API_ENDPOINTS, getImageUrl } from "../utils/apiConfig";
 
 export const AuthContext = createContext();
 
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }) => {
   // Function to fetch user profile
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch("http://localhost:8000/healthify/auth/profile", {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.PROFILE), {
         credentials: "include",
       });
 
@@ -49,7 +50,7 @@ export const AuthProvider = ({ children }) => {
           ...userData,
           avatar:
             userData.profilePhoto && userData.profilePhoto.trim() !== ""
-              ? `http://localhost:8000${userData.profilePhoto}`
+              ? getImageUrl(userData.profilePhoto)
               : userData.name?.charAt(0).toUpperCase(),
         };
 
@@ -60,6 +61,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
+      console.error("Profile fetch error:", error);
       setIsAuthenticated(false);
       setUser(null);
     }
@@ -78,7 +80,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch("http://localhost:8000/healthify/auth/login", {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.LOGIN), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -96,13 +98,14 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: errorData.msg };
       }
     } catch (error) {
-      return { success: false, message: "Network error" };
+      console.error("Login error:", error);
+      return { success: false, message: "Network error: " + error.message };
     }
   };
 
   const logout = async () => {
     try {
-      await fetch("http://localhost:8000/healthify/auth/logout", {
+      await fetch(getApiUrl(API_ENDPOINTS.LOGOUT), {
         method: "POST",
         credentials: "include",
       });
@@ -110,6 +113,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       return { success: true };
     } catch (error) {
+      console.error("Logout error:", error);
       return { success: false, message: "Logout failed" };
     }
   };

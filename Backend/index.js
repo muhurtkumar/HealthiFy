@@ -2,6 +2,7 @@ const express = require('express');
 const connectDB = require("./config/db");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
+const path = require('path');
 const auth = require("./routes/auth");
 
 const app = express();
@@ -11,7 +12,12 @@ connectDB();
 
 // CORS configuration for cookie-based authentication
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173', 
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    /^http:\/\/192\.168\.\d+\.\d+:\d+$/  // Allow any IP in 192.168.x.x range with any port
+  ],
   credentials: true, // Allow credentials (cookies)
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -25,7 +31,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/healthify/auth", auth);
-app.use("/uploads", express.static("uploads")); // Serve uploaded images
+
+// Serve uploaded images with absolute path for reliability
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Test route
 app.get('/', (req, res) => {
