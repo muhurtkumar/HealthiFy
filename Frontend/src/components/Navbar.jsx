@@ -150,13 +150,13 @@ const Navbar = () => {
                         }
                       >
                         <Avatar
-                          src={user?.profilePhoto}
+                          src={user?.avatar && typeof user?.avatar === 'string' && user?.avatar.startsWith('http') ? user.avatar : undefined}
                           sx={{ 
                             width: 36, 
                             height: 36,
                           }}
                         >
-                          {user?.name?.charAt(0).toUpperCase()}
+                          {typeof user?.avatar === 'string' && !user?.avatar.startsWith('http') ? user.avatar : user?.name?.charAt(0).toUpperCase() || 'U'}
                         </Avatar>
                       </Badge>
                       <Typography
@@ -262,10 +262,10 @@ const Navbar = () => {
               <Box className="flex items-center space-x-3">
                 {isAuthenticated && (
                   <Avatar
-                    src={typeof user?.avatar === "string" && user?.avatar.startsWith("http") ? user.avatar : undefined}
+                    src={user?.avatar && typeof user?.avatar === 'string' && user?.avatar.startsWith('http') ? user.avatar : undefined}
                     className="bg-blue-600 text-white font-bold"
                   >
-                    {typeof user?.avatar === "string" && !user?.avatar.startsWith("http") ? user.avatar : "U"}
+                    {typeof user?.avatar === 'string' && !user?.avatar.startsWith('http') ? user.avatar : user?.name?.charAt(0).toUpperCase() || 'U'}
                   </Avatar>
                 )}
                 <Typography variant="h6" className="text-blue-600 font-semibold">

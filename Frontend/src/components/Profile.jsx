@@ -63,9 +63,11 @@ const Profile = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [alert, setAlert] = useState({ open: false, message: "", severity: "success" });
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     if (user) {
+      console.log('User profile data:', user);
       setFormData({
         name: user.name || "",
         email: user.email || "",
@@ -92,8 +94,11 @@ const Profile = () => {
   const handleProfilePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // You would typically upload this to your server
-      // For now, just set a local URL
+      console.log('Selected file:', file.name, 'size:', file.size, 'type:', file.type);
+      // Store the file for upload
+      setSelectedFile(file);
+      
+      // Create a preview URL
       setFormData({
         ...formData,
         profilePhoto: URL.createObjectURL(file),
@@ -130,11 +135,16 @@ const Profile = () => {
       // Call the updateProfile function
       const result = await updateProfile(formData);
       
+      console.log('Profile updated successfully:', result);
+      
       // Update the context with new user data (sync local state with global state)
       if (result.user) {
         // Update user data in context
         updateUserProfile(result.user);
       }
+      
+      // Reset selected file state
+      setSelectedFile(null);
       
       setAlert({
         open: true,
@@ -165,13 +175,29 @@ const Profile = () => {
   // For updating profile
   const updateProfile = async (profileData) => {
     try {
+      // Use FormData instead of JSON for file uploads
+      const formData = new FormData();
+      
+      // Add all form fields to FormData
+      Object.keys(profileData).forEach(key => {
+        // Skip the profilePhoto field as we'll handle it separately
+        if (key !== 'profilePhoto') {
+          formData.append(key, profileData[key]);
+        }
+      });
+      
+      // Add the file if one was selected
+      if (selectedFile) {
+        console.log('Uploading file:', selectedFile.name);
+        formData.append('profilePhoto', selectedFile);
+      }
+      
+      console.log('Sending profile update request to server...');
       const response = await fetch("http://localhost:8000/healthify/auth/update-profile", {
-        method: "PUT", 
-        headers: {
-          "Content-Type": "application/json",
-        },
+        method: "PUT",
+        // Don't set Content-Type header, browser will set it with the boundary
         credentials: "include",
-        body: JSON.stringify(profileData)
+        body: formData
       });
       
       if (!response.ok) {
@@ -311,7 +337,7 @@ const Profile = () => {
                 <Box className="flex flex-col items-center">
                   <Box className="relative">
                     <Avatar
-                      src={formData.profilePhoto}
+                      src={selectedFile ? formData.profilePhoto : (formData.profilePhoto && formData.profilePhoto.startsWith('/') ? `http://localhost:8000${formData.profilePhoto}` : formData.profilePhoto)}
                       alt={formData.name}
                       className="w-40 h-40 bg-blue-100 text-blue-600 text-4xl"
                       sx={{ width: 160, height: 160, fontSize: 64 }}
