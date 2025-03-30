@@ -1,10 +1,39 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useMemo } from "react";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [user, setUser] = useState(null);
+  const [profileStatus, setProfileStatus] = useState({
+    isComplete: true,
+    percentage: 100
+  });
+
+  // Calculate profile completion whenever user changes
+  const checkProfileCompletion = (userData) => {
+    if (!userData) return { isComplete: true, percentage: 100 };
+    
+    const requiredFields = [
+      { name: 'name', value: userData.name },
+      { name: 'phone', value: userData.phone },
+      { name: 'gender', value: userData.gender },
+      { name: 'address', value: userData.address },
+      { name: 'city', value: userData.city },
+      { name: 'dateOfBirth', value: userData.dateOfBirth }
+    ];
+    
+    const completedFields = requiredFields.filter(field => 
+      field.value && String(field.value).trim() !== ''
+    );
+    
+    const percentage = Math.round((completedFields.length / requiredFields.length) * 100);
+    
+    return {
+      percentage,
+      isComplete: percentage === 100
+    };
+  };
 
   // Function to fetch user profile
   const fetchUserProfile = async () => {
@@ -39,6 +68,13 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     fetchUserProfile();
   }, []);
+
+  // Update profile status whenever user data changes
+  useEffect(() => {
+    if (user) {
+      setProfileStatus(checkProfileCompletion(user));
+    }
+  }, [user]);
 
   const login = async (email, password) => {
     try {
@@ -78,8 +114,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserProfile = (updatedData) => {
+    const newUserData = { ...user, ...updatedData };
+    localStorage.setItem("user", JSON.stringify(newUserData));
+    setUser(newUserData);
+    // Profile status will update automatically through the useEffect
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      user, 
+      login, 
+      logout, 
+      profileStatus,
+      updateUserProfile 
+    }}>
       {isAuthenticated === null ? null : children}
     </AuthContext.Provider>
   );

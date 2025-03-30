@@ -3,16 +3,19 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import {
   AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Button, Box, Drawer, List, ListItem, ListItemText, 
-  Divider, Typography, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
+  Divider, Typography, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Tooltip, Badge
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import { useTheme, ThemeProvider, createTheme } from "@mui/material/styles";
 
 const theme = createTheme();
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout } = useContext(AuthContext);
+  const { isAuthenticated, user, logout, profileStatus } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
@@ -79,15 +82,104 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 {!isMobile && (
-                  <IconButton onClick={handleMenuOpen}>
-                    <Avatar
-                      src={typeof user?.avatar === "string" && user?.avatar.startsWith("http") ? user.avatar : undefined}
-                      className="bg-blue-600 text-white font-bold"
+                  <>
+                    {/* Profile completion notification */}
+                    {!profileStatus.isComplete && (
+                      <Tooltip 
+                        title={
+                          <Box p={1}>
+                            <Typography variant="subtitle2">
+                              Your profile is incomplete ({profileStatus.percentage}%)
+                            </Typography>
+                            <Typography variant="body2" fontSize="12px">
+                              Complete your profile for a better experience
+                            </Typography>
+                          </Box>
+                        }
+                        arrow
+                        placement="bottom"
+                      >
+                        <IconButton 
+                          size="small" 
+                          onClick={() => navigate('/profile')}
+                          sx={{ mr: 1 }}
+                        >
+                          <Badge 
+                            color="error" 
+                            variant="dot"
+                            overlap="circular"
+                            badgeContent=""
+                          >
+                            <NotificationsNoneIcon fontSize="small" />
+                          </Badge>
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                    
+                    <Box
+                      onClick={handleMenuOpen}
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        borderRadius: '30px',
+                        padding: '4px 16px 4px 4px',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'rgba(255, 255, 255, 1)',
+                        },
+                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                        gap: '8px'
+                      }}
                     >
-                      {typeof user?.avatar === "string" && !user?.avatar.startsWith("http") ? user.avatar : "U"}
-                    </Avatar>
-
-                  </IconButton>
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        badgeContent={
+                          !profileStatus.isComplete ? (
+                            <Box
+                              sx={{
+                                width: 12,
+                                height: 12,
+                                bgcolor: 'error.main',
+                                borderRadius: '50%',
+                                border: '2px solid white',
+                              }}
+                            />
+                          ) : null
+                        }
+                      >
+                        <Avatar
+                          src={user?.profilePhoto}
+                          sx={{ 
+                            width: 36, 
+                            height: 36,
+                          }}
+                        >
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </Avatar>
+                      </Badge>
+                      <Typography
+                        sx={{
+                          fontSize: '14px',
+                          fontWeight: 500,
+                          color: '#444',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {user?.name 
+                          ? user.name.split(' ')[0].toLowerCase() 
+                          : user?.email?.split('@')[0]}
+                      </Typography>
+                      <MoreVertIcon 
+                        sx={{ 
+                          fontSize: 18,
+                          color: '#666',
+                          marginLeft: 'auto'
+                        }}
+                      />
+                    </Box>
+                  </>
                 )}
                 <Menu
                   anchorEl={anchorEl}
@@ -95,14 +187,54 @@ const Navbar = () => {
                   onClose={handleMenuClose}
                   anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                   transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  PaperProps={{
+                    elevation: 3,
+                    sx: {
+                      mt: 1.5,
+                      overflow: 'visible',
+                      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
+                      '&:before': {
+                        content: '""',
+                        display: 'block',
+                        position: 'absolute',
+                        top: 0,
+                        right: 14,
+                        width: 10,
+                        height: 10,
+                        bgcolor: 'background.paper',
+                        transform: 'translateY(-50%) rotate(45deg)',
+                        zIndex: 0,
+                      },
+                    }
+                  }}
                 >
-                  <MenuItem onClick={() => { navigate("/profile"); handleMenuClose(); }} className="hover:bg-gray-100">
-                    Profile
+                  <MenuItem 
+                    onClick={() => { navigate("/profile"); handleMenuClose(); }} 
+                    className="hover:bg-gray-100"
+                  >
+                    <Box display="flex" alignItems="center" width="100%">
+                      <Typography>Profile</Typography>
+                      {!profileStatus.isComplete && (
+                        <Box 
+                          component="span"
+                          sx={{
+                            ml: 'auto',
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            bgcolor: 'error.main'
+                          }}
+                        />
+                      )}
+                    </Box>
                   </MenuItem>
                   <MenuItem onClick={() => { navigate("/my-appointments"); handleMenuClose(); }} className="hover:bg-gray-100">
                     My Appointments
                   </MenuItem>
-                  <MenuItem onClick={() => { setOpenLogoutDialog(true); handleMenuClose(); }} className="hover:bg-red-100 text-red-600">Logout</MenuItem>
+                  <Divider />
+                  <MenuItem onClick={() => { setOpenLogoutDialog(true); handleMenuClose(); }} className="hover:bg-red-50 text-red-600">
+                    Logout
+                  </MenuItem>
                 </Menu>
               </>
             ) : (

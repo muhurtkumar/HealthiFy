@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import ForgotPassword from "./components/ForgotPassword";
 import Home from "./components/Home";
 import MyAppointment from "./components/MyAppointment";
+import Profile from "./components/Profile";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
             <Route path="/my-appointments" element={<MyAppointment />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
       </Router>
