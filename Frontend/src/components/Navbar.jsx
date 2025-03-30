@@ -54,21 +54,21 @@ const Navbar = () => {
   return (
     <ThemeProvider theme={theme}>
       <AppBar position="sticky" className="bg-blue-600 shadow-md">
-        <Toolbar className="flex justify-between items-center px-4">
+        <Toolbar className="flex justify-between items-center px-4 h-16">
           {/* Logo */}
-          <NavLink to="/" className="text-2xl font-bold text-white">
+          <NavLink to="/" className="text-2xl font-bold text-white no-underline">
             Health<span className="text-red-500">iFy</span>
           </NavLink>
 
           {/* Desktop Navigation */}
           {!isMobile && (
-            <Box className="flex space-x-6 text-white text-lg">
+            <Box className="flex space-x-6 text-white text-lg" sx={{ flex: 1, justifyContent: 'center' }}>
               {navItems.map(({ path, label }) => (
                 <NavLink
                   key={path}
                   to={path}
                   className={({ isActive }) =>
-                    isActive ? "text-red-600 font-semibold" : "hover:text-red-500 transition duration-300"
+                    `${isActive ? "text-red-600 font-semibold" : "hover:text-red-500 transition duration-300"} no-underline px-2`
                   }
                 >
                   {label}
@@ -78,7 +78,7 @@ const Navbar = () => {
           )}
 
           {/* Right Section (Avatar & Login) */}
-          <Box className="flex items-center">
+          <Box className="flex items-center" sx={{ minWidth: isMobile ? 'auto' : '180px', justifyContent: 'flex-end' }}>
             {isAuthenticated ? (
               <>
                 {!isMobile && (
@@ -129,7 +129,11 @@ const Navbar = () => {
                           backgroundColor: 'rgba(255, 255, 255, 1)',
                         },
                         boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                        gap: '8px'
+                        gap: '8px',
+                        width: '140px',
+                        justifyContent: 'flex-start',
+                        minWidth: '140px',
+                        transition: 'none'
                       }}
                     >
                       <Badge
@@ -164,7 +168,11 @@ const Navbar = () => {
                           fontSize: '14px',
                           fontWeight: 500,
                           color: '#444',
-                          overflow: 'hidden'
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          width: '70px',
+                          maxWidth: '70px'
                         }}
                       >
                         {user?.name 
@@ -187,6 +195,9 @@ const Navbar = () => {
                   onClose={handleMenuClose}
                   anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                   transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  keepMounted
+                  disableScrollLock={true}
+                  disablePortal={false}
                   PaperProps={{
                     elevation: 3,
                     sx: {
