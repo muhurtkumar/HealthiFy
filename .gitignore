@@ -16,6 +16,16 @@ Backend/node_modules/
 dist
 dist-ssr
 *.local
+Frontend/dist
+Frontend/build
+Backend/dist
+Backend/build
+
+# User uploaded files
+Backend/upload/
+Backend/uploads/
+*/uploads/
+*/upload/
 
 # Environment variables
 .env
@@ -49,3 +59,27 @@ Backend/.env.development
 Backend/.env.production
 Backend/.env.test
 Backend/.env.*.local
+
+# Local development server specific
+.cache/
+coverage/
+.nyc_output/
+
+# Logs and debug files
+npm-debug.log*
+*.debug.log
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+tmp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
