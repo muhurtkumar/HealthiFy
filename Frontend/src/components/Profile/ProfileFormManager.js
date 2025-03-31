@@ -126,7 +126,7 @@ export const useProfileForm = (user, updateUserProfile) => {
     }
     
     try {
-      const response = await fetch("http://localhost:8000/healthify/auth/update-profile", {
+      const response = await fetch("http://localhost:8000/healthify/profile/update-profile", {
         method: "PUT",
         credentials: "include",
         body: formData

@@ -3,6 +3,7 @@ const connectDB = require("./config/db");
 const cors = require("cors");
 const cookieParser = require('cookie-parser');
 const auth = require("./routes/auth");
+const profile = require("./routes/profile");
 
 const app = express();
 const PORT = 8000;
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/healthify/auth", auth);
+app.use("/healthify/profile", profile);
 app.use("/uploads", express.static("uploads")); // Serve uploaded images
 
 // Test route

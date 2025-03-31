@@ -290,7 +290,7 @@ const Navbar = () => {
             {/* Menu Items */}
             <List className="flex-grow">
               {navItems.map(({ path, label }) => (
-                <ListItem key={path} button onClick={handleDrawerToggle}>
+                <ListItem key={path} component="div" onClick={handleDrawerToggle}>
                   <NavLink
                     to={path}
                     className={({ isActive }) =>

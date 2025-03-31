@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   // Function to fetch user profile
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch("http://localhost:8000/healthify/auth/profile", {
+      const response = await fetch("http://localhost:8000/healthify/profile/user-profile", {
         credentials: "include",
       });
 
