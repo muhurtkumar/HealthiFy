@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User");
 const multer = require("multer");
 const authMiddleware = require("../middlewares/authMiddleware");
+const roleMiddleware = require("../middlewares/roleMiddleware");
 const fs = require('fs');
 const path = require('path');
 
@@ -46,7 +47,7 @@ const upload = multer({
 });
 
 // Get User Profile (Protected)
-router.get("/user-profile", authMiddleware, async (req, res) => {
+router.get("/user-profile", authMiddleware, roleMiddleware(["Patient"]), async (req, res) => {
     try {
       const user = await User.findById(req.user.id).select("-password");
       if (!user) return res.status(404).json({ msg: "User not found" });
@@ -60,7 +61,7 @@ router.get("/user-profile", authMiddleware, async (req, res) => {
   // Update User Profile (Protected)
   router.put(
     "/update-profile",
-    authMiddleware,
+    authMiddleware, roleMiddleware(["Patient"]),
     upload.single("profilePhoto"),
     async (req, res) => {
       try {
