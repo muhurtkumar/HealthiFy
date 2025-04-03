@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const auth = require("./routes/auth");
 const profile = require("./routes/profile");
 const doctorAuth = require("./routes/Doctor/doctorAuth");
+const doctorApproval = require("./routes/Admin/doctorApproval");
 
 const app = express();
 const PORT = 8000;
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/healthify/auth", auth);
 app.use("/healthify/profile", profile);
 app.use("/healthify/doctor", doctorAuth);
+app.use("/healthify/admin/requests", doctorApproval);
 app.use("/uploads", express.static("uploads")); // Serve uploaded images
 
 // Test route

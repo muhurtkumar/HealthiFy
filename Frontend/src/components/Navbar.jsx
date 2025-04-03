@@ -35,7 +35,7 @@ const Navbar = () => {
 
   let navItems = [];
 
-  if (isAuthenticated && user?.role === "doctor") {
+  if (isAuthenticated && user?.role === "Doctor") {
     navItems = [
       { path: "/dashboard", label: "Dashboard" },
       { path: "/patient-requests", label: "Patient Requests" },
