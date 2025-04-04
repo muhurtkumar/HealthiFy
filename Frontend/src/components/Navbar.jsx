@@ -17,6 +17,7 @@ const theme = createTheme();
 const Navbar = () => {
   const { isAuthenticated, user, logout, profileStatus } = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [loginAnchorEl, setLoginAnchorEl] = useState(null); // New state for login dropdown
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const navigate = useNavigate();
@@ -25,6 +26,11 @@ const Navbar = () => {
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+  
+  // New handlers for login dropdown
+  const handleLoginMenuOpen = (event) => setLoginAnchorEl(event.currentTarget);
+  const handleLoginMenuClose = () => setLoginAnchorEl(null);
+  
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   const handleLogout = () => {
@@ -249,9 +255,44 @@ const Navbar = () => {
               </>
             ) : (
               !isMobile && (
-                <NavLink to="/login">
-                  <Button variant="contained" sx={{ borderRadius: "20px", backgroundColor: "#4a90e2", color: "white", textTransform: "none" }}>Login</Button>
-                </NavLink>
+                <>
+                  <Button 
+                    variant="contained" 
+                    sx={{ 
+                      borderRadius: "20px", 
+                      backgroundColor: "#4a90e2", 
+                      color: "white", 
+                      textTransform: "none" 
+                    }}
+                    onClick={handleLoginMenuOpen}
+                  >
+                    Login
+                  </Button>
+                  <Menu
+                    anchorEl={loginAnchorEl}
+                    open={Boolean(loginAnchorEl)}
+                    onClose={handleLoginMenuClose}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    transformOrigin={{ vertical: "top", horizontal: "right" }}
+                  >
+                    <MenuItem 
+                      onClick={() => { 
+                        navigate("/login?role=patient"); 
+                        handleLoginMenuClose(); 
+                      }}
+                    >
+                      Login as Patient
+                    </MenuItem>
+                    <MenuItem 
+                      onClick={() => { 
+                        navigate("/login?role=doctor"); 
+                        handleLoginMenuClose(); 
+                      }}
+                    >
+                      Login as Doctor
+                    </MenuItem>
+                  </Menu>
+                </>
               )
             )}
 
@@ -318,11 +359,28 @@ const Navbar = () => {
                   <Button fullWidth className="bg-red-500 text-white mt-2" onClick={() => { setOpenLogoutDialog(true); handleDrawerToggle(); }}>Logout</Button>
                 </>
               ) : (
-                <NavLink to="/login">
-                  <Button fullWidth className="bg-blue-500 text-white mt-2" onClick={handleDrawerToggle}>
-                    Login
+                <>
+                  <Button 
+                    fullWidth 
+                    className="bg-blue-500 text-white mt-2" 
+                    onClick={() => { 
+                      navigate("/login?role=patient"); 
+                      handleDrawerToggle(); 
+                    }}
+                  >
+                    Login as Patient
                   </Button>
-                </NavLink>
+                  <Button 
+                    fullWidth 
+                    className="bg-blue-500 text-white mt-2" 
+                    onClick={() => { 
+                      navigate("/login?role=doctor"); 
+                      handleDrawerToggle(); 
+                    }}
+                  >
+                    Login as Doctor
+                  </Button>
+                </>
               )}
             </Box>
           </Box>
