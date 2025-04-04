@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { TextField, Button, Typography } from "@mui/material";
 
 const VerifyEmail = () => {
@@ -9,6 +9,9 @@ const VerifyEmail = () => {
     const [loading, setLoading] = useState(false);
     const inputRefs = useRef([]);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const role = searchParams.get('role') || 'patient';
 
     useEffect(() => {
         const storedEmail = localStorage.getItem("email");
@@ -60,7 +63,12 @@ const VerifyEmail = () => {
 
             if (response.ok) {
                 localStorage.removeItem("email");
-                navigate("/login");
+                // Navigate based on role
+                if (role === 'doctor') {
+                    navigate("/doctor-approval-form");
+                } else {
+                    navigate(`/login?role=${role}`);
+                }
             } else {
                 setErrorMessage(data.msg || "Invalid OTP! Please try again.");
             }

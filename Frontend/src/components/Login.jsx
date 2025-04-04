@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { TextField, Button, Typography, Box, CircularProgress, InputAdornment } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext"; 
 
 const Login = () => {
@@ -11,6 +11,9 @@ const Login = () => {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
+  const [searchParams] = useSearchParams();
+
+  const role = searchParams.get('role') || 'patient';
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -27,6 +30,11 @@ const Login = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle navigation to register with role
+  const handleSignUp = () => {
+    navigate(`/register?role=${role}`);
   };
 
   return (
@@ -53,7 +61,7 @@ const Login = () => {
           {loading ? <CircularProgress size={24} sx={{ color: "#fff" }} /> : "Sign In"}
         </Button>
 
-        <Typography sx={{ color: "#6b7280", mt: 2 }}>Don't have an account? <span style={{ color: "#3b82f6", cursor: "pointer" }} onClick={() => navigate("/register")}>Sign Up</span></Typography>
+        <Typography sx={{ color: "#6b7280", mt: 2 }}>Don't have an account? <span style={{ color: "#3b82f6", cursor: "pointer" }} onClick={handleSignUp}>Sign Up</span></Typography>
       </Box>
     </Box>
   );
