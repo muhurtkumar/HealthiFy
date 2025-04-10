@@ -277,7 +277,7 @@ const Navbar = () => {
                   >
                     <MenuItem 
                       onClick={() => { 
-                        navigate("/login?role=patient"); 
+                        navigate("/login?role=Patient"); 
                         handleLoginMenuClose(); 
                       }}
                     >
@@ -285,7 +285,7 @@ const Navbar = () => {
                     </MenuItem>
                     <MenuItem 
                       onClick={() => { 
-                        navigate("/login?role=doctor"); 
+                        navigate("/login?role=Doctor"); 
                         handleLoginMenuClose(); 
                       }}
                     >
@@ -364,7 +364,7 @@ const Navbar = () => {
                     fullWidth 
                     className="bg-blue-500 text-white mt-2" 
                     onClick={() => { 
-                      navigate("/login?role=patient"); 
+                      navigate("/login?role=Patient"); 
                       handleDrawerToggle(); 
                     }}
                   >
@@ -374,7 +374,7 @@ const Navbar = () => {
                     fullWidth 
                     className="bg-blue-500 text-white mt-2" 
                     onClick={() => { 
-                      navigate("/login?role=doctor"); 
+                      navigate("/login?role=Doctor"); 
                       handleDrawerToggle(); 
                     }}
                   >

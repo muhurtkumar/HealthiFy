@@ -1,10 +1,11 @@
 const express = require("express");
 const Doctor = require("../../models/Doctor");
 const User = require("../../models/User");
-const authMiddleware = require("../../middlewares/authMiddleware");
+const roleMiddleware = require("../../middlewares/roleMiddleware");
 const multer = require("multer");
 const fs = require('fs');
 const path = require('path');
+const authMiddleware = require("../../middlewares/authMiddleware");
 
 // Multer Setup for Profile Photo Upload
 // Configure storage
@@ -55,7 +56,7 @@ const removeUploadedFile = (filePath) => {
 
 const router = express.Router();
 
-router.post("/doctor-request", authMiddleware, upload.single("profilePhoto"), async (req, res) => {
+router.post("/doctor-request", authMiddleware, roleMiddleware(["Doctor"]), upload.single("profilePhoto"), async (req, res) => {
     try {
         const { specialization, experience, licenseNumber, clinicAddress, clinicCity, consultationFee, phone, gender, address, city, state} = req.body;
         const userId = req.user.id;

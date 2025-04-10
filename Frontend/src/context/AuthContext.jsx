@@ -1,14 +1,18 @@
-import { createContext, useState, useEffect, useMemo } from "react";
+import { createContext, useState, useEffect} from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [user, setUser] = useState(null);
+  const [doctorStatus, setDoctorStatus] = useState(null);
   const [profileStatus, setProfileStatus] = useState({
     isComplete: true,
     percentage: 100
   });
+
+  const location = useLocation();
 
   // Calculate profile completion whenever user changes
   const checkProfileCompletion = (userData) => {
@@ -55,6 +59,10 @@ export const AuthProvider = ({ children }) => {
 
         setIsAuthenticated(true);
         setUser(userWithAvatar);
+        // Update doctor status if role is Doctor
+        if (userData.role === "Doctor") {
+          setDoctorStatus(userData.doctorProfile?.status || null);
+        }
       } else {
         setIsAuthenticated(false);
         setUser(null);
@@ -78,19 +86,27 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      const searchParams = new URLSearchParams(location.search);
+      const role = searchParams.get("role") || "Patient";
       const response = await fetch("http://localhost:8000/healthify/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }),
         credentials: "include",
       });
 
       if (response.ok) {
+        const result = await response.json();
         // After successful login, fetch full profile
         await fetchUserProfile();
-        return { success: true };
+        return {
+          success: true,
+          user: result.user,
+          redirect: result.redirect,
+          message: result.message
+        };
       } else {
         const errorData = await response.json();
         return { success: false, message: errorData.msg };
@@ -108,6 +124,7 @@ export const AuthProvider = ({ children }) => {
       });
       setIsAuthenticated(false);
       setUser(null);
+      setDoctorStatus(null);
       return { success: true };
     } catch (error) {
       return { success: false, message: "Logout failed" };
@@ -128,6 +145,7 @@ export const AuthProvider = ({ children }) => {
       login, 
       logout, 
       profileStatus,
+      doctorStatus,
       updateUserProfile 
     }}>
       {isAuthenticated === null ? null : children}

@@ -22,8 +22,24 @@ const Login = () => {
     setMessage("");
     try {
       const result = await login(formData.email, formData.password);
-      if (result.success) navigate("/");
-      else setMessage(result.message || "Login failed");
+      if (result.success) {
+        const { role } = result.user;
+        const doctorStatus = result.user.doctorStatus ?? result.doctorStatus;
+  
+        if (role === "Doctor") {
+          if (!doctorStatus || doctorStatus === "pending" || doctorStatus === "rejected") {
+            navigate("/doctor/registration-form");
+          } else if (doctorStatus === "approved") {
+            navigate("/doctor/dashboard");
+          } else {
+            setMessage("Unknown doctor status.");
+          }
+        } else {
+          navigate("/");
+        }
+      } else {
+        setMessage(result.message || "Login failed");
+      }
     } catch (error) {
       setMessage("An error occurred. Please try again.");
       console.error("Login error:", error);

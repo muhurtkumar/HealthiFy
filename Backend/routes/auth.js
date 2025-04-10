@@ -19,10 +19,15 @@ const transporter = nodemailer.createTransport({
 // Step 1: Register User & Send OTP
 router.post("/register", async (req, res) => {
   try {
-    const { email, name, password } = req.body;
+    const { email, name, password, role } = req.body;
 
-    if (!email || !name || !password) {
+    if (!email || !name || !password || !role) {
       return res.status(400).json({ msg: "All fields are required" });
+    }
+
+    const allowedRoles = ["Patient", "Doctor", "Admin"];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ msg: "Invalid role. Must be Patient, Doctor, or Admin." });
     }
     
     if (password.length < 8) {
@@ -43,6 +48,7 @@ router.post("/register", async (req, res) => {
       email,
       name,
       password,
+      role,
       verified: false,
       otp,
       otpExpires: Date.now() + 5 * 60 * 1000, // OTP expires in 5 minutes
@@ -97,16 +103,20 @@ router.post("/verify-otp", async (req, res) => {
 // Login User
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !role) {
       return res.status(400).json({ msg: "Please enter all fields" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("doctorProfile");
 
     if (!user || !user.verified) {
       return res.status(400).json({ msg: "User is not registered or not verified" });
+    }
+
+    if (user.role !== role) {
+      return res.status(403).json({ msg: `You are not registered as a ${role}` });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -121,10 +131,36 @@ router.post("/login", async (req, res) => {
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
+    
+    let redirect = "/";
+    let message = "";
+    // Doctor-specific redirect logic
+    if (role === "Doctor") {
+      const doctorProfile = user.doctorProfile;
+
+      if (!doctorProfile || doctorProfile.status === "rejected") {
+        redirect = "/healthify/doctor/doctor-request";
+      } else if (doctorProfile.status === "pending") {
+        redirect = "/healthify/doctor/doctor-request";
+        message = "Waiting for admin approval";
+      } else if (doctorProfile.status === "approved") {
+        redirect = "/healthify/doctor/doctor-dashboard";
+      }
+    }
 
     res.json({ 
-      user: { id: user._id, name: user.name, email: user.email, role: user.role, profilePhoto: user.profilePhoto || "" } 
-    });
+      success: true,
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role, 
+        profilePhoto: user.profilePhoto || "",
+        doctorStatus: user.doctorProfile?.status || null
+      },
+      redirect,
+      message
+    });    
 
   } catch (err) {
     res.status(500).json({ msg: "Server error", error: err.message });

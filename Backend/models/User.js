@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
   role: { 
     type: String, 
     enum: ["Patient", "Doctor", "Admin"], 
-    default: "Patient" 
+    required: [true, "Role is required"], 
   },
   phone: { 
     type: String, 
@@ -38,7 +38,17 @@ const UserSchema = new mongoose.Schema({
   verified: { type: Boolean, default: false },
   resetPasswordOTP: { type: String },
   resetPasswordExpires: { type: Date },
-}, { timestamps: true });
+}, { timestamps: true,
+      toJSON: { virtuals: true },
+      toObject: { virtuals: true } 
+   });
+
+UserSchema.virtual("doctorProfile", {
+  ref: "Doctor",
+  localField: "_id",
+  foreignField: "user",
+  justOne: true,
+});
 
 // Hash password before saving (Only if modified)
 UserSchema.pre("save", async function (next) {

@@ -23,7 +23,7 @@ const Register = () => {
       const res = await fetch("http://localhost:8000/healthify/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, role }),
       });
       const data = await res.json();
       if (res.ok) {

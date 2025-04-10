@@ -47,7 +47,7 @@ const upload = multer({
 });
 
 // Get User Profile (Protected)
-router.get("/user-profile", authMiddleware, roleMiddleware(["Patient"]), async (req, res) => {
+router.get("/user-profile", authMiddleware, roleMiddleware(["Patient", "Doctor"]), async (req, res) => {
     try {
       const user = await User.findById(req.user.id).select("-password");
       if (!user) return res.status(404).json({ msg: "User not found" });
@@ -61,7 +61,7 @@ router.get("/user-profile", authMiddleware, roleMiddleware(["Patient"]), async (
   // Update User Profile (Protected)
   router.put(
     "/update-profile",
-    authMiddleware, roleMiddleware(["Patient"]),
+    authMiddleware, roleMiddleware(["Patient", "Doctor"]),
     upload.single("profilePhoto"),
     async (req, res) => {
       try {
