@@ -11,11 +11,13 @@ import ForgotPassword from "./components/ForgotPassword";
 import Home from "./components/Home";
 import MyAppointment from "./components/MyAppointment";
 import UserProfilePage from "./components/Profile/UserProfilePage";
+import DoctorRegistrationForm from "./components/Doc-Registeration/RegisterationForm";
 
 function App() {
   return (
-    <AuthProvider>
+    
       <Router>
+        <AuthProvider>
         <Navbar />
         <Routes>
           <Route path="/register" element={<Register />} />
@@ -26,11 +28,18 @@ function App() {
           {/* Protected Routes for patients */}
 +         <Route element={<PrivateRoute allowedRoles={["Patient"]} />}>
             <Route path="/my-appointments" element={<MyAppointment />} />
+          </Route>
+          {/* Protected Routes for doctors */}
+          <Route element={<PrivateRoute allowedRoles={["Doctor"]} />}>
+          <Route path="/doctor/registration-form" element={<DoctorRegistrationForm />} />
+          </Route>
+          {/* Protected Routes for doctors and patients */}
+          <Route element={<PrivateRoute allowedRoles={["Patient", "Doctor"]} />}>
             <Route path="/profile" element={<UserProfilePage />} />
           </Route>
         </Routes>
+        </AuthProvider>
       </Router>
-    </AuthProvider>
   );
 }
 
