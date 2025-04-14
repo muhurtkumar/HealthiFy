@@ -49,7 +49,7 @@ const upload = multer({
 // Get User Profile (Protected)
 router.get("/user-profile", authMiddleware, roleMiddleware(["Patient", "Doctor"]), async (req, res) => {
     try {
-      const user = await User.findById(req.user.id).select("-password");
+      const user = await User.findById(req.user.id).select("-password").populate("doctorProfile");
       if (!user) return res.status(404).json({ msg: "User not found" });
   
       res.json(user);

@@ -30,7 +30,7 @@ const Login = () => {
           if (!doctorStatus || doctorStatus === "pending" || doctorStatus === "rejected") {
             navigate("/doctor/registration-form");
           } else if (doctorStatus === "approved") {
-            navigate("/doctor/dashboard");
+            navigate("/doctor/doctor-dashboard");
           } else {
             setMessage("Unknown doctor status.");
           }

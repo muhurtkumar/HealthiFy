@@ -1,18 +1,10 @@
-import React, { useState } from "react";
-import {
-  TextField,
-  MenuItem,
-  InputLabel,
-  Select,
-  FormControl,
-  Checkbox,
-  ListItemText,
-  OutlinedInput,
-} from "@mui/material";
+import React, { useState, useContext } from "react";
+import { TextField, MenuItem, InputLabel, Select, FormControl, Checkbox, ListItemText, OutlinedInput, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
 import FormContainer from "./FormContainer";
 import FormAlert from "./FormAlert";
 import FileUpload from "./FileUpload";
 import SubmitButton from "./SubmitButton";
+import { AuthContext } from "../../context/AuthContext";
 
 const DoctorRegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +14,9 @@ const DoctorRegistrationForm = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
+  
+  const { isAuthenticated, logout } = useContext(AuthContext);
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   const handleChange = (e) => {
@@ -152,10 +146,39 @@ const DoctorRegistrationForm = () => {
           </FormControl>
           <FileUpload label="Profile Photo (Max 5MB)" onChange={handleFileChange} id="profile-photo-input" accept="image/jpeg,image/jpg,image/png,image/webp" required />
         </div>
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-between items-center mt-8">
           <SubmitButton loading={isSubmitting} label="Submit" fullWidth={false} />
+          {isAuthenticated && (
+            <Button 
+              variant="outlined"
+              color="error"
+              onClick={() => setOpenLogoutDialog(true)}
+              sx={{ ml: 2 }}
+            >
+              Logout
+            </Button>
+          )}
         </div>
       </form>
+
+      <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
+        <DialogTitle>Confirm Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to logout?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenLogoutDialog(false)}>Cancel</Button>
+          <Button 
+            onClick={() => {
+              logout();
+              setOpenLogoutDialog(false);
+            }} 
+            color="error"
+          >
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </FormContainer>
   );
 };

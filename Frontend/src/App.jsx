@@ -12,6 +12,7 @@ import Home from "./components/Home";
 import MyAppointment from "./components/MyAppointment";
 import UserProfilePage from "./components/Profile/UserProfilePage";
 import DoctorRegistrationForm from "./components/Doc-Registeration/RegisterationForm";
+import Dashboard from "./components/Dashboard";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           {/* Protected Routes for doctors */}
           <Route element={<PrivateRoute allowedRoles={["Doctor"]} />}>
           <Route path="/doctor/registration-form" element={<DoctorRegistrationForm />} />
+          <Route path="/doctor/doctor-dashboard" element={<Dashboard />} />
           </Route>
           {/* Protected Routes for doctors and patients */}
           <Route element={<PrivateRoute allowedRoles={["Patient", "Doctor"]} />}>
