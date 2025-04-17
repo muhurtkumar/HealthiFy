@@ -8,15 +8,21 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // For password visibility toggle
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // For confirm password visibility toggle
   const navigate = useNavigate();
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const sendOTP = async () => {
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
     setMessage("");
     try {
@@ -40,6 +46,7 @@ const Register = () => {
   };
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
 
   return (
     <Box sx={{ minHeight: "calc(100vh - 64px)", display: "flex", alignItems: { xs: "flex-start", sm: "center" }, justifyContent: "center", background: "#f9fafb", padding: { xs: 2, sm: 4 }, overflow: "auto" }}>
@@ -47,8 +54,8 @@ const Register = () => {
         <Typography variant="h4" sx={{ color: "#1f2937", fontWeight: "bold", mb: 1 }}>Create Account</Typography>
         <Typography sx={{ color: "#6b7280", mb: 1 }}>Create your account</Typography>
 
-        {["name", "email", "password"].map((field, index) => (
-          <TextField key={index} fullWidth label={field === "name" ? "Full Name" : field === "email" ? "Email ID" : "Password"} name={field} type={field === "password" ? (showPassword ? "text" : "password") : "text"} value={formData[field]} onChange={handleChange} margin="normal" variant="outlined"
+        {["name", "email", "password", "confirmPassword"].map((field, index) => (
+          <TextField key={index} fullWidth label={field === "name" ? "Full Name" : field === "email" ? "Email ID" : field === "password" ? "Password" : "Confirm Password"} name={field} type={field === "password" || field === "confirmPassword" ? (field === "password" ? showPassword ? "text" : "password" : showConfirmPassword ? "text" : "password") : "text"} value={formData[field]} onChange={handleChange} margin="normal" variant="outlined"
             sx={{ "& .MuiOutlinedInput-root": { borderRadius: 20, height: 40, backgroundColor: "#e0f2fe" }, "& .MuiInputBase-input": { padding: "10px" } }}
             InputProps={{
               startAdornment: (
@@ -56,10 +63,10 @@ const Register = () => {
                   {field === "name" ? <PersonIcon sx={{ color: "#6b7280" }} /> : field === "email" ? <EmailIcon sx={{ color: "#6b7280" }} /> : <LockIcon sx={{ color: "#6b7280" }} />}
                 </InputAdornment>
               ),
-              endAdornment: field === "password" && (
+              endAdornment: (field === "password" || field === "confirmPassword") && (
                 <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowPassword} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  <IconButton onClick={field === "password" ? handleClickShowPassword : handleClickShowConfirmPassword} edge="end">
+                    {field === "password" ? (showPassword ? <VisibilityOff /> : <Visibility />) : (showConfirmPassword ? <VisibilityOff /> : <Visibility />)}
                   </IconButton>
                 </InputAdornment>
               ),

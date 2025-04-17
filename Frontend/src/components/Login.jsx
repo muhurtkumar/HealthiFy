@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext"; 
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ email: "", password: "", confirmPassword: "" });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +20,11 @@ const Login = () => {
   const handleLogin = async () => {
     setLoading(true);
     setMessage("");
+    if (formData.password !== formData.confirmPassword) {
+      setMessage("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
     try {
       const result = await login(formData.email, formData.password);
       if (result.success) navigate("/");
@@ -55,6 +60,24 @@ const Login = () => {
             }}
           />
         ))}
+
+        <TextField fullWidth label="Confirm Password" name="confirmPassword" type={showPassword ? "text" : "password"} value={formData.confirmPassword} onChange={handleChange} margin="normal" variant="outlined"
+          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 20, height: 40, backgroundColor: "#e0f2fe" }, "& .MuiInputBase-input": { padding: "10px" } }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <LockIcon sx={{ color: "#6b7280" }} />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleClickShowPassword} edge="end">
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            )
+          }}
+        />
 
         {/* Forgot Password UI */}
         <Typography sx={{ color: "#3b82f6", textAlign: "right", mt: 1, cursor: "pointer" }} onClick={() => navigate("/forgot-password")}>

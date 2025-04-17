@@ -19,10 +19,14 @@ const transporter = nodemailer.createTransport({
 // Step 1: Register User & Send OTP
 router.post("/register", async (req, res) => {
   try {
-    const { email, name, password } = req.body;
+    const { email, name, password, confirmPassword } = req.body;
 
-    if (!email || !name || !password) {
+    if (!email || !name || !password || !confirmPassword) {
       return res.status(400).json({ msg: "All fields are required" });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ msg: "Passwords do not match" });
     }
     
     if (password.length < 8) {
