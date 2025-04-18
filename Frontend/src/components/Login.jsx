@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { TextField, Button, Typography, Box, CircularProgress, InputAdornment, IconButton } from "@mui/material";
+import { TextField, Button, Typography, Box, CircularProgress, InputAdornment, IconButton, Radio, RadioGroup, FormControlLabel, FormLabel, FormControl } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import Visibility from "@mui/icons-material/Visibility";
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext"; 
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "", confirmPassword: "" });
+  const [formData, setFormData] = useState({ email: "", password: "", confirmPassword: "", role: "Patient" });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,16 +17,15 @@ const Login = () => {
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  const handleRoleChange = (e) => {
+    setFormData(prev => ({ ...prev, role: e.target.value }));
+  };
+
   const handleLogin = async () => {
     setLoading(true);
     setMessage("");
-    if (formData.password !== formData.confirmPassword) {
-      setMessage("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
     try {
-      const result = await login(formData.email, formData.password);
+      const result = await login(formData.email, formData.password, formData.role);
       if (result.success) navigate("/");
       else setMessage(result.message || "Login failed");
     } catch (error) {
@@ -45,6 +44,13 @@ const Login = () => {
         <Typography variant="h4" sx={{ color: "#1f2937", fontWeight: "bold", mb: 1 }}>Welcome Back</Typography>
         <Typography sx={{ color: "#6b7280", mb: 1 }}>Sign in to your account</Typography>
 
+        <FormControl component="fieldset" sx={{ width: '100%', mb: 2 }}>
+          <RadioGroup row aria-label="role" name="role" value={formData.role} onChange={handleRoleChange} sx={{ justifyContent: 'center', gap: 3 }} >
+            <FormControlLabel value="Patient" control={<Radio />} label="Patient" sx={{ margin: 0 }} />
+            <FormControlLabel value="Doctor" control={<Radio />} label="Doctor"sx={{ margin: 0 }} />
+          </RadioGroup>
+        </FormControl>
+
         {["email", "password"].map((field, index) => (
           <TextField key={index} fullWidth label={field === "email" ? "Email ID" : "Password"} name={field} type={field === "password" ? (showPassword ? "text" : "password") : "text"} value={formData[field]} onChange={handleChange} margin="normal" variant="outlined"
             sx={{ "& .MuiOutlinedInput-root": { borderRadius: 20, height: 40, backgroundColor: "#e0f2fe" }, "& .MuiInputBase-input": { padding: "10px" } }}
@@ -60,24 +66,6 @@ const Login = () => {
             }}
           />
         ))}
-
-        <TextField fullWidth label="Confirm Password" name="confirmPassword" type={showPassword ? "text" : "password"} value={formData.confirmPassword} onChange={handleChange} margin="normal" variant="outlined"
-          sx={{ "& .MuiOutlinedInput-root": { borderRadius: 20, height: 40, backgroundColor: "#e0f2fe" }, "& .MuiInputBase-input": { padding: "10px" } }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <LockIcon sx={{ color: "#6b7280" }} />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={handleClickShowPassword} edge="end">
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            )
-          }}
-        />
 
         {/* Forgot Password UI */}
         <Typography sx={{ color: "#3b82f6", textAlign: "right", mt: 1, cursor: "pointer" }} onClick={() => navigate("/forgot-password")}>

@@ -24,7 +24,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           {/* Protected Routes for patients */}
-+         <Route element={<PrivateRoute allowedRoles={["Patient"]} />}>
++         <Route element={<PrivateRoute allowedRoles={["Patient", "Doctor"]} />}>
             <Route path="/my-appointments" element={<MyAppointment />} />
             <Route path="/profile" element={<UserProfilePage />} />
           </Route>

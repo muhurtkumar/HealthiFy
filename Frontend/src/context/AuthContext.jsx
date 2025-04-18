@@ -76,18 +76,25 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  const login = async (email, password) => {
+  const login = async (email, password, selectedRole) => {
     try {
       const response = await fetch("http://localhost:8000/healthify/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role: selectedRole }),
         credentials: "include",
       });
 
       if (response.ok) {
+        const data = await response.json();
+        if (data.user.role !== selectedRole) {
+          return { 
+            success: false, 
+            message: `You are not logged in as ${selectedRole}. Please select the correct role.` 
+          };
+        }
         // After successful login, fetch full profile
         await fetchUserProfile();
         return { success: true };

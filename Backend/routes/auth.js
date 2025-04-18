@@ -101,9 +101,9 @@ router.post("/verify-otp", async (req, res) => {
 // Login User
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    if (!email || !password) {
+    if (!email || !password || !role) {
       return res.status(400).json({ msg: "Please enter all fields" });
     }
 
@@ -111,6 +111,12 @@ router.post("/login", async (req, res) => {
 
     if (!user || !user.verified) {
       return res.status(400).json({ msg: "User is not registered or not verified" });
+    }
+
+    if (user.role !== role) {
+      return res.status(403).json({ 
+        msg: `Access denied. You are not registered as a ${role}.` 
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
