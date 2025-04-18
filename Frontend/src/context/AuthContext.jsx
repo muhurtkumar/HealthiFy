@@ -76,14 +76,20 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user]);
 
-  const login = async (email, password, selectedRole) => {
+  const login = async (email, passwordOrKey, selectedRole) => {
     try {
-      const response = await fetch("http://localhost:8000/healthify/auth/login", {
+      let endpoint = "http://localhost:8000/healthify/auth/login";
+      let requestBody = { email, password: passwordOrKey, role: selectedRole };
+      if (selectedRole === "Admin") {
+        endpoint = "http://localhost:8000/healthify/auth/admin-login";
+        requestBody = { email, securityKey: passwordOrKey };
+      }
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, role: selectedRole }),
+        body: JSON.stringify(requestBody),
         credentials: "include",
       });
 

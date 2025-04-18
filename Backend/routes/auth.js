@@ -141,6 +141,49 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Admin Login (email + security key)
+router.post("/admin-login", async (req, res) => {
+  try {
+    const { email, securityKey } = req.body;
+
+    if (!email || !securityKey) {
+      return res.status(400).json({ msg: "Please enter both email and security key" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ msg: "User not found" });
+    }
+
+    if (user.role !== "Admin") {
+      return res.status(403).json({ msg: "You are not authorized to log in as admin" });
+    }
+
+    // Check if the provided security key matches the one in the .env
+    if (securityKey !== process.env.ADMIN_SECURITY_KEY) {
+      return res.status(400).json({ msg: "Invalid security key" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    // Set cookie with token
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
+    res.json({
+      user: { id: user._id, name: user.name, email: user.email, role: user.role, profilePhoto: user.profilePhoto || "" }
+    });
+
+  } catch (err) {
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
+});
+
 // Forgot Password - Send OTP
 router.post("/forgot-password", async (req, res) => {
   try {
