@@ -1,10 +1,13 @@
 import { createContext, useState, useEffect, useMemo } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [profileStatus, setProfileStatus] = useState({
     isComplete: true,
     percentage: 100
@@ -62,6 +65,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       setIsAuthenticated(false);
       setUser(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,6 +101,7 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         if (data.user.role !== selectedRole) {
+          setLoading(false);
           return { 
             success: false, 
             message: `You are not logged in as ${selectedRole}. Please select the correct role.` 
@@ -106,9 +112,11 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       } else {
         const errorData = await response.json();
+        setLoading(false);
         return { success: false, message: errorData.msg };
       }
     } catch (error) {
+      setLoading(false);
       return { success: false, message: "Network error" };
     }
   };
@@ -134,16 +142,32 @@ export const AuthProvider = ({ children }) => {
     // Profile status will update automatically through the useEffect
   };
 
+  const contextValue = useMemo(() => ({
+    isAuthenticated,
+    user,
+    login,
+    logout,
+    profileStatus,
+    updateUserProfile,
+    loading,
+  }), [isAuthenticated, user, profileStatus, loading]);
+
   return (
-    <AuthContext.Provider value={{ 
-      isAuthenticated, 
-      user, 
-      login, 
-      logout, 
-      profileStatus,
-      updateUserProfile 
-    }}>
-      {isAuthenticated === null ? null : children}
+    <AuthContext.Provider value={contextValue}>
+      {loading ? (
+        <Box
+          sx={{
+            height: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

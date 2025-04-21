@@ -35,12 +35,8 @@ const Navbar = () => {
 
   let navItems = [];
 
-  if (isAuthenticated && user?.role === "doctor") {
-    navItems = [
-      { path: "/dashboard", label: "Dashboard" },
-      { path: "/patient-requests", label: "Patient Requests" },
-      { path: "/video-calls", label: "Video Calls" },
-    ];
+  if (isAuthenticated && (user?.role === "Doctor" || user?.role === "Admin")) {
+    navItems = [];
   } else {
     navItems = [
       { path: "/", label: "Home" },
@@ -49,6 +45,9 @@ const Navbar = () => {
       { path: "/contact", label: "Contact" },
     ];
   }
+
+  const isAdmin = user?.role === "Admin";
+  const isDoctorOrAdmin = user?.role === "Doctor" || isAdmin;
 
   return (
     <ThemeProvider theme={theme}>
@@ -82,8 +81,8 @@ const Navbar = () => {
               <>
                 {!isMobile && (
                   <>
-                    {/* Profile completion notification */}
-                    {!profileStatus.isComplete && (
+                    {/* Profile completion notification - only show if not admin*/}
+                    {!isAdmin && !profileStatus.isComplete && (
                       <Tooltip 
                         title={
                           <Box p={1}>
@@ -218,7 +217,7 @@ const Navbar = () => {
                     }
                   }}
                 >
-                  <MenuItem 
+                  {!isAdmin && (<MenuItem 
                     onClick={() => { navigate("/profile"); handleMenuClose(); }} 
                     className="hover:bg-gray-100"
                   >
@@ -238,9 +237,12 @@ const Navbar = () => {
                       )}
                     </Box>
                   </MenuItem>
-                  <MenuItem onClick={() => { navigate("/my-appointments"); handleMenuClose(); }} className="hover:bg-gray-100">
-                    My Appointments
-                  </MenuItem>
+                  )}
+                  {!isDoctorOrAdmin && (
+                    <MenuItem onClick={() => { navigate("/my-appointments"); handleMenuClose(); }} className="hover:bg-gray-100">
+                      My Appointments
+                    </MenuItem>
+                  )}
                   <Divider />
                   <MenuItem onClick={() => { setOpenLogoutDialog(true); handleMenuClose(); }} className="hover:bg-red-50 text-red-600">
                     Logout
@@ -309,12 +311,16 @@ const Navbar = () => {
             <Box className="p-4">
               {isAuthenticated ? (
                 <>
-                  <Button fullWidth className="bg-gray-100 text-black" onClick={() => { navigate("/profile"); handleDrawerToggle(); }}>
-                    Profile
-                  </Button>
-                  <Button fullWidth className="bg-gray-100 text-black mt-2" onClick={() => { navigate("/my-appointments"); handleDrawerToggle(); }}>
-                    My Appointments
-                  </Button>
+                  {!isAdmin && (
+                    <Button fullWidth className="bg-gray-100 text-black" onClick={() => { navigate("/profile"); handleDrawerToggle(); }}>
+                      Profile
+                    </Button>
+                  )}
+                  {!isDoctorOrAdmin && (
+                    <Button fullWidth className="bg-gray-100 text-black mt-2" onClick={() => { navigate("/my-appointments"); handleDrawerToggle(); }}>
+                      My Appointments
+                    </Button>
+                  )}
                   <Button fullWidth className="bg-red-500 text-white mt-2" onClick={() => { setOpenLogoutDialog(true); handleDrawerToggle(); }}>Logout</Button>
                 </>
               ) : (
