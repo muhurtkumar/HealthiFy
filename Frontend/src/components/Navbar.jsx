@@ -81,110 +81,129 @@ const Navbar = () => {
               <>
                 {!isMobile && (
                   <>
-                    {/* Profile completion notification - only show if not admin*/}
-                    {!isAdmin && !profileStatus.isComplete && (
-                      <Tooltip 
-                        title={
-                          <Box p={1}>
-                            <Typography variant="subtitle2">
-                              Your profile is incomplete ({profileStatus.percentage}%)
-                            </Typography>
-                            <Typography variant="body2" fontSize="12px">
-                              Complete your profile for a better experience
-                            </Typography>
-                          </Box>
-                        }
-                        arrow
-                        placement="bottom"
-                      >
-                        <IconButton 
-                          size="small" 
-                          onClick={() => navigate('/profile')}
-                          sx={{ mr: 1 }}
-                        >
-                          <Badge 
-                            color="error" 
-                            variant="dot"
-                            overlap="circular"
-                            badgeContent=""
+                    {!isAdmin ? (
+                      <>
+                        {/* Profile completion notification - only show if not admin*/}
+                        {!profileStatus.isComplete && (
+                          <Tooltip 
+                            title={
+                              <Box p={1}>
+                                <Typography variant="subtitle2">
+                                  Your profile is incomplete ({profileStatus.percentage}%)
+                                </Typography>
+                                <Typography variant="body2" fontSize="12px">
+                                  Complete your profile for a better experience
+                                </Typography>
+                              </Box>
+                            }
+                            arrow
+                            placement="bottom"
                           >
-                            <NotificationsNoneIcon fontSize="small" />
-                          </Badge>
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                    
-                    <Box
-                      onClick={handleMenuOpen}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: '30px',
-                        padding: '4px 16px 4px 4px',
-                        cursor: 'pointer',
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 255, 255, 1)',
-                        },
-                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-                        gap: '8px',
-                        width: '140px',
-                        justifyContent: 'flex-start',
-                        minWidth: '140px',
-                        transition: 'none'
-                      }}
-                    >
-                      <Badge
-                        overlap="circular"
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                        badgeContent={
-                          !profileStatus.isComplete ? (
-                            <Box
-                              sx={{
-                                width: 12,
-                                height: 12,
-                                bgcolor: 'error.main',
-                                borderRadius: '50%',
-                                border: '2px solid white',
-                              }}
-                            />
-                          ) : null
-                        }
-                      >
-                        <Avatar
-                          src={user?.avatar && typeof user?.avatar === 'string' && user?.avatar.startsWith('http') ? user.avatar : undefined}
-                          sx={{ 
-                            width: 36, 
-                            height: 36,
+                            <IconButton 
+                              size="small" 
+                              onClick={() => navigate('/profile')}
+                              sx={{ mr: 1 }}
+                            >
+                              <Badge 
+                                color="error" 
+                                variant="dot"
+                                overlap="circular"
+                                badgeContent=""
+                              >
+                                <NotificationsNoneIcon fontSize="small" />
+                              </Badge>
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        <Box
+                          onClick={handleMenuOpen}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            borderRadius: '30px',
+                            padding: '4px 16px 4px 4px',
+                            cursor: 'pointer',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255, 255, 255, 1)',
+                            },
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                            gap: '8px',
+                            width: '140px',
+                            justifyContent: 'flex-start',
+                            minWidth: '140px',
+                            transition: 'none'
                           }}
                         >
-                          {typeof user?.avatar === 'string' && !user?.avatar.startsWith('http') ? user.avatar : user?.name?.charAt(0).toUpperCase() || 'U'}
-                        </Avatar>
-                      </Badge>
-                      <Typography
+                          <Badge
+                            overlap="circular"
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                            badgeContent={
+                              !profileStatus.isComplete ? (
+                                <Box
+                                  sx={{
+                                    width: 12,
+                                    height: 12,
+                                    bgcolor: 'error.main',
+                                    borderRadius: '50%',
+                                    border: '2px solid white',
+                                  }}
+                                />
+                              ) : null
+                            }
+                          >
+                            <Avatar
+                              src={user?.avatar && typeof user?.avatar === 'string' && user?.avatar.startsWith('http') ? user.avatar : undefined}
+                              sx={{ 
+                                width: 36, 
+                                height: 36,
+                              }}
+                            >
+                              {typeof user?.avatar === 'string' && !user?.avatar.startsWith('http') ? user.avatar : user?.name?.charAt(0).toUpperCase() || 'U'}
+                            </Avatar>
+                          </Badge>
+                          <Typography
+                            sx={{
+                              fontSize: '14px',
+                              fontWeight: 500,
+                              color: '#444',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              width: '70px',
+                              maxWidth: '70px'
+                            }}
+                          >
+                            {user?.name 
+                              ? user.name.split(' ')[0].toLowerCase() 
+                              : user?.email?.split('@')[0]}
+                          </Typography>
+                          <MoreVertIcon 
+                            sx={{ 
+                              fontSize: 18,
+                              color: '#666',
+                              marginLeft: 'auto'
+                            }}
+                          />
+                        </Box>
+                      </>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        onClick={() => setOpenLogoutDialog(true)}
                         sx={{
-                          fontSize: '14px',
-                          fontWeight: 500,
-                          color: '#444',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          width: '70px',
-                          maxWidth: '70px'
+                          borderRadius: "20px",
+                          backgroundColor: "#f44336",
+                          color: "white",
+                          textTransform: "none",
+                          "&:hover": {
+                            backgroundColor: "#d32f2f",
+                          },
                         }}
                       >
-                        {user?.name 
-                          ? user.name.split(' ')[0].toLowerCase() 
-                          : user?.email?.split('@')[0]}
-                      </Typography>
-                      <MoreVertIcon 
-                        sx={{ 
-                          fontSize: 18,
-                          color: '#666',
-                          marginLeft: 'auto'
-                        }}
-                      />
-                    </Box>
+                        Logout
+                      </Button>
+                    )}
                   </>
                 )}
                 <Menu
@@ -217,26 +236,27 @@ const Navbar = () => {
                     }
                   }}
                 >
-                  {!isAdmin && (<MenuItem 
-                    onClick={() => { navigate("/profile"); handleMenuClose(); }} 
-                    className="hover:bg-gray-100"
-                  >
-                    <Box display="flex" alignItems="center" width="100%">
-                      <Typography>Profile</Typography>
-                      {!profileStatus.isComplete && (
-                        <Box 
-                          component="span"
-                          sx={{
-                            ml: 'auto',
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: 'error.main'
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </MenuItem>
+                  {!isAdmin && (
+                    <MenuItem 
+                      onClick={() => { navigate("/profile"); handleMenuClose(); }} 
+                      className="hover:bg-gray-100"
+                    >
+                      <Box display="flex" alignItems="center" width="100%">
+                        <Typography>Profile</Typography>
+                        {!profileStatus.isComplete && (
+                          <Box 
+                            component="span"
+                            sx={{
+                              ml: 'auto',
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: 'error.main'
+                            }}
+                          />
+                        )}
+                      </Box>
+                    </MenuItem>
                   )}
                   {!isDoctorOrAdmin && (
                     <MenuItem onClick={() => { navigate("/my-appointments"); handleMenuClose(); }} className="hover:bg-gray-100">
@@ -256,7 +276,6 @@ const Navbar = () => {
                 </NavLink>
               )
             )}
-
             {/* Mobile Menu Button */}
             {isMobile && (
               <IconButton edge="end" color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
@@ -265,11 +284,9 @@ const Navbar = () => {
             )}
           </Box>
         </Toolbar>
-
         {/* Mobile Drawer */}
         <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
           <Box className="w-72 flex flex-col h-full bg-white">
-            {/* Header with Avatar and Close Button */}
             <Box className="flex justify-between items-center px-4 py-3 border-b">
               <Box className="flex items-center space-x-3">
                 {isAuthenticated && (
@@ -288,7 +305,6 @@ const Navbar = () => {
                 <CloseIcon />
               </IconButton>
             </Box>
-
             {/* Menu Items */}
             <List className="flex-grow">
               {navItems.map(({ path, label }) => (
@@ -306,7 +322,6 @@ const Navbar = () => {
             </List>
 
             <Divider />
-
             {/* Authentication Options */}
             <Box className="p-4">
               {isAuthenticated ? (
