@@ -1,9 +1,10 @@
 import { useContext, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { LayoutContext } from "../context/LayoutContext";
 import {
   AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Button, Box, Drawer, List, ListItem, ListItemText, 
-  Divider, Typography, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
+  Divider, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
   Tooltip, Badge
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -11,17 +12,19 @@ import CloseIcon from "@mui/icons-material/Close";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import Sidebar from "./SideBar";
+import { Outlet } from "react-router-dom";
+import CssBaseline from "@mui/material/CssBaseline";
 
 const theme = createTheme();
 
 const Navbar = () => {
   const { isAuthenticated, user, logout, profileStatus } = useContext(AuthContext);
+  const { isMobile, isTablet, isDesktop, getContentMargin } = useContext(LayoutContext);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const navigate = useNavigate();
-
-  const isMobile = useMediaQuery('(max-width:680px)');
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -51,7 +54,11 @@ const Navbar = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppBar position="sticky" className="bg-blue-600 shadow-md">
+      <Box sx={{ display: 'flex', }}>
+      <CssBaseline />
+      <AppBar position="fixed" sx={{ 
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }} className="bg-blue-600 shadow-md">
         <Toolbar className="flex justify-between items-center px-4 h-16">
           {/* Logo */}
           <NavLink to="/" className="text-2xl font-bold text-white no-underline">
@@ -363,6 +370,25 @@ const Navbar = () => {
           </DialogActions>
         </Dialog>
       </AppBar>
+      {isDoctorOrAdmin && (
+        <>
+          {isDesktop && <Sidebar userRole={user?.role} variant="full" />}
+          {isTablet && <Sidebar userRole={user?.role} variant="compact" />}
+        </>
+      )}
+      <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            paddingTop: '40px',
+            ...getContentMargin(user?.role),
+            transition: 'margin-left 0.3s ease',
+          }}
+        >
+          <Outlet />
+        </Box>
+      </Box>
     </ThemeProvider>
   );
 };
