@@ -5,7 +5,7 @@ import { LayoutContext } from "../context/LayoutContext";
 import {
   AppBar, Toolbar, IconButton, Menu, MenuItem, Avatar, Button, Box, Drawer, List, ListItem, ListItemText, 
   Divider, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-  Tooltip, Badge
+  Tooltip, Badge, ListItemButton, Collapse
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -15,6 +15,8 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Sidebar from "./SideBar";
 import { Outlet } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 const theme = createTheme();
 
@@ -25,6 +27,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const navigate = useNavigate();
+  const [openDoctorsDropdown, setOpenDoctorsDropdown] = useState(false);
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -52,7 +55,14 @@ const Navbar = () => {
   const sidebarItems = user?.role === "Admin" 
   ? [
       { path: "/admin/dashboard", label: "Dashboard" },
-      { path: "/admin/doctors", label: "Doctors" },
+      { 
+        label: "Doctors",
+        dropdown: true,
+        items: [
+          { path: "/admin/doctors/add", label: "Add Doctor" },
+          { path: "/admin/doctors/manage", label: "Manage Doctors" },
+        ],
+      },
       { path: "/admin/patients", label: "Patients" },
       { path: "/admin/appointments", label: "Appointments" },
       { path: "/admin/settings", label: "Settings" },
@@ -331,22 +341,63 @@ const Navbar = () => {
             </Box>
             {/* Menu Items */}
             <List className="flex-grow">
-              {(isDoctorOrAdmin ? sidebarItems : navItems).map(({ path, label }) => (
-                <ListItem 
-                  key={path} 
-                  component={NavLink}
-                  to={path}
-                  onClick={handleDrawerToggle}
-                  sx={{
-                    '&.active': {
-                      color: 'red',
-                      fontWeight: 'bold',
-                    }
-                  }}
-                >
-                  <ListItemText primary={label} />
-                </ListItem>
-              ))}
+              {(isDoctorOrAdmin ? sidebarItems : navItems).map((item) => {
+                if (item.dropdown) {
+                  return (
+                    <div key={item.label}>
+                      <ListItemButton 
+                        onClick={() => setOpenDoctorsDropdown(!openDoctorsDropdown)}
+                        sx={{
+                          '&.active': {
+                            color: 'red',
+                            fontWeight: 'bold',
+                          }
+                        }}
+                      >
+                        <ListItemText primary={item.label} />
+                        {openDoctorsDropdown ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </ListItemButton>
+                      <Collapse in={openDoctorsDropdown} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding>
+                          {item.items.map((subItem) => (
+                            <ListItem 
+                              key={subItem.path} 
+                              component={NavLink}
+                              to={subItem.path}
+                              onClick={handleDrawerToggle}
+                              sx={{
+                                pl: 4,
+                                '&.active': {
+                                  color: 'red',
+                                  fontWeight: 'bold',
+                                }
+                              }}
+                            >
+                              <ListItemText primary={subItem.label} />
+                            </ListItem>
+                          ))}
+                        </List>
+                      </Collapse>
+                    </div>
+                  );
+                }
+                return (
+                  <ListItem 
+                    key={item.path} 
+                    component={NavLink}
+                    to={item.path}
+                    onClick={handleDrawerToggle}
+                    sx={{
+                      '&.active': {
+                        color: 'red',
+                        fontWeight: 'bold',
+                      }
+                    }}
+                  >
+                    <ListItemText primary={item.label} />
+                  </ListItem>
+                );
+              })}
             </List>
 
             <Divider />
