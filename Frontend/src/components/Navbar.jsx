@@ -49,6 +49,23 @@ const Navbar = () => {
     ];
   }
 
+  const sidebarItems = user?.role === "Admin" 
+  ? [
+      { path: "/admin/dashboard", label: "Dashboard" },
+      { path: "/admin/doctors", label: "Doctors" },
+      { path: "/admin/patients", label: "Patients" },
+      { path: "/admin/appointments", label: "Appointments" },
+      { path: "/admin/settings", label: "Settings" },
+    ]
+  : user?.role === "Doctor"
+    ? [
+        { path: "/doctor/dashboard", label: "Dashboard" },
+        { path: "/doctor/appointments", label: "Appointments" },
+        { path: "/doctor/patients", label: "Patients" },
+        { path: "/doctor/settings", label: "Settings" },
+      ]
+    : [];
+
   const isAdmin = user?.role === "Admin";
   const isDoctorOrAdmin = user?.role === "Doctor" || isAdmin;
 
@@ -314,16 +331,20 @@ const Navbar = () => {
             </Box>
             {/* Menu Items */}
             <List className="flex-grow">
-              {navItems.map(({ path, label }) => (
-                <ListItem key={path} component="div" onClick={handleDrawerToggle}>
-                  <NavLink
-                    to={path}
-                    className={({ isActive }) =>
-                      isActive ? "text-red-600 font-semibold" : "text-black hover:text-red-500 transition duration-300"
+              {(isDoctorOrAdmin ? sidebarItems : navItems).map(({ path, label }) => (
+                <ListItem 
+                  key={path} 
+                  component={NavLink}
+                  to={path}
+                  onClick={handleDrawerToggle}
+                  sx={{
+                    '&.active': {
+                      color: 'red',
+                      fontWeight: 'bold',
                     }
-                  >
-                    <ListItemText primary={label} />
-                  </NavLink>
+                  }}
+                >
+                  <ListItemText primary={label} />
                 </ListItem>
               ))}
             </List>
